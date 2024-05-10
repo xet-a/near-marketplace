@@ -8,8 +8,10 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 # 4.0.0 -> no matching package named `parity-secp256k1` error
-near-sdk = "5.1.0"
+# 5.0.0 이후 legacy enable 해야 함 https://github.com/near/near-sdk-rs/blob/e22f74ea9f6a0be8fe030a9225716eab811116ea/CHANGELOG.md#500---2024-02-21
+near-sdk = { version = "5.1.0", features = ["legacy"] }
 serde = { version = "1.0", features = ["derive"] }
+borsh = "0.10.0"
 
 [profile.release]
 codegen-units = 1
