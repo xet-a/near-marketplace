@@ -1,5 +1,3 @@
-use core::str;
-
 // UnorderedMap: storage로 사용할 data structure
 // Borsh~: 직렬화, 역직렬화 format
 // near_bindgen: 함수, 구조체가 외부에서 호출 가능하도록 생성 즉, 유효한 near contract로 변환
@@ -13,7 +11,7 @@ use serde::{Deserialize, Serialize};
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct MarketPlace {
-    products: UnorderedMap<String, String>
+    listed_products: UnorderedMap<String, Product>
 }
 
 // implement marketplace methods
@@ -25,23 +23,28 @@ impl MarketPlace {
     #[init]
     pub fn init() -> Self {
         Self {
-            products: UnorderedMap::new(b"product".to_vec()),
+            listed_products: UnorderedMap::new(b"listed_products".to_vec()),
         }
     }
 
-    // add a new product to the `products` map
-    // id: key, product_name: value
-    // * the key for the persistent collection should be as short as possible to reduce storage space
-    // because this key will be repeated for every record in the collection *
-    pub fn set_product(&mut self, id: String, product_name: String) {
-        self.products.insert(&id, &product_name);
+    // add a new product to the `listed_products` map by using `Payload` struct
+    // * first check if the product id already exists in the map
+    // If it does, this throws an error
+    pub fn set_product(&mut self, payload: Payload) {
+        let product = Product::from_payload(payload);
+        self.listed_products.insert(&product.id, &product);
     }
 
     // retreive a product from the `products` map
-    // return either a product name or `null`
+    // return either a product struct or `null`
     // * all read methods should be immutable
-    pub fn get_product(&self, id: &String) -> Option<String> {
-        self.products.get(id)
+    pub fn get_product(&self, id: &String) -> Option<Product> {
+        self.listed_products.get(id)
+    }
+
+    // return all products in the map
+    pub fn get_products(&self) -> Vec<Product> {
+        return self.listed_products.values_as_vector().to_vec();
     }
 }
 
