@@ -5,7 +5,7 @@
 // Promise: allows to assemble transfer calls to other accounts
 use near_sdk::collections::UnorderedMap;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, near_bindgen, AccountId, PanicOnDefault, Promise};
+use near_sdk::{env, near_bindgen, AccountId, NearToken, PanicOnDefault, Promise};
 use near_sdk::serde::{Deserialize, Serialize};
 
 // mod migrate;
@@ -64,12 +64,17 @@ impl MarketPlace {
         match self.listed_products.get(product_id) {
             // check if the product exists
             Some(ref mut product) => {
-                let price = product.price.parse().unwrap();
+                let price_yoctonear: u128 = product.price.parse::<u128>().unwrap();
+                let price_token = NearToken::from_yoctonear(price_yoctonear);
+                let deposit = env::attached_deposit();
+
                 // check if the attached deposit is equl to the product's price
-                assert_eq! (env::attached_deposit(), price, "attatched deposit should be equal to the product's");
+                assert_eq! (deposit, price_token, "attatched deposit should be equal to the product's");
+                
                 let owner = &product.owner.as_str();
                 // then create a new `Promise` object and call the `transfer` method
-                Promise::new(owner.parse().unwrap()).transfer(price);
+                Promise::new(owner.parse().unwrap()).transfer(price_token);
+                
                 // increment the `sold` field of the product and update the product in the `listed_products` map
                 product.increment_sold_amount();
                 self.listed_products.insert(&product.id, &product);
