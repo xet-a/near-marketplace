@@ -2,10 +2,11 @@
 // Borsh~: 직렬화, 역직렬화 format
 // near_bindgen: 함수, 구조체가 외부에서 호출 가능하도록 생성 즉, 유효한 near contract로 변환
 // PanicOnDefault: contract가 초기화되기 전에 호출되면 panic이 발생하는 Default 속성 구현
+// Promise: allows to assemble transfer calls to other accounts
 use near_sdk::collections::UnorderedMap;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, near_bindgen, AccountId, PanicOnDefault};
-use serde::{Deserialize, Serialize};
+use near_sdk::{env, near_bindgen, AccountId, PanicOnDefault, Promise};
+use near_sdk::serde::{Deserialize, Serialize};
 
 // mod migrate;
 
@@ -55,6 +56,28 @@ impl MarketPlace {
     // return all products in the map
     pub fn get_products(&self) -> Vec<Product> {
         return self.listed_products.values_as_vector().to_vec();
+    }
+
+    #[payable]
+    pub fn buy_product(&mut self, product_id: &String) {
+        // retrieve the product with the specified id
+        match self.listed_products.get(product_id) {
+            // check if the product exists
+            Some(ref mut product) => {
+                let price = product.price.parse().unwrap();
+                // check if the attached deposit is equl to the product's price
+                assert_eq! (env::attached_deposit(), price, "attatched deposit should be equal to the product's");
+                let owner = &product.owner.as_str();
+                // then create a new `Promise` object and call the `transfer` method
+                Promise::new(owner.parse().unwrap()).transfer(price);
+                // increment the `sold` field of the product and update the product in the `listed_products` map
+                product.increment_sold_amount();
+                self.listed_products.insert(&product.id, &product);
+            },
+            _ => {
+                env::panic_str("product not found");
+            }
+        }
     }
 }
 
