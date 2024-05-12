@@ -7,11 +7,21 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen, AccountId, PanicOnDefault};
 use serde::{Deserialize, Serialize};
 
+// mod migrate;
+
 // declare the structure and its variable
 #[near_bindgen]
-#[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
+#[derive(BorshDeserialize, BorshSerialize)] //, PanicOnDefault)]
 pub struct MarketPlace {
     listed_products: UnorderedMap<String, Product>
+}
+
+impl Default for MarketPlace {
+    fn default() -> Self {
+        Self {
+            listed_products: UnorderedMap::new(b"listed_products".to_vec()),
+        }
+    }
 }
 
 // implement marketplace methods
@@ -20,12 +30,12 @@ impl MarketPlace {
 
     // initialize the contract
     // create a new instance of `UnorderedMap`
-    #[init]
-    pub fn init() -> Self {
-        Self {
-            listed_products: UnorderedMap::new(b"listed_products".to_vec()),
-        }
-    }
+    // #[init]
+    // pub fn init() -> Self {
+    //     Self {
+    //         listed_products: UnorderedMap::new(b"listed_products".to_vec()),
+    //     }
+    // }
 
     // add a new product to the `listed_products` map by using `Payload` struct
     // * first check if the product id already exists in the map
@@ -48,7 +58,6 @@ impl MarketPlace {
     }
 }
 
-#[near_bindgen]
 #[derive(BorshSerialize, BorshDeserialize, Serialize, PanicOnDefault)]
 pub struct Product {
     id: String,
@@ -62,7 +71,6 @@ pub struct Product {
 }
 
 // used as an intermediate object, Product 구조체로 매핑
-#[near_bindgen]
 #[derive(Serialize, Deserialize, PanicOnDefault)]
 pub struct Payload {
     id: String,
@@ -73,7 +81,6 @@ pub struct Payload {
     price: String
 }
 
-#[near_bindgen]
 impl Product {
     
     // map Payload to Product
