@@ -12,18 +12,18 @@ use near_sdk::serde::{Deserialize, Serialize};
 
 // declare the structure and its variable
 #[near_bindgen]
-#[derive(BorshDeserialize, BorshSerialize)] //, PanicOnDefault)]
+#[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct MarketPlace {
     listed_products: UnorderedMap<String, Product>
 }
 
-impl Default for MarketPlace {
-    fn default() -> Self {
-        Self {
-            listed_products: UnorderedMap::new(b"listed_products".to_vec()),
-        }
-    }
-}
+// impl Default for MarketPlace {
+//     fn default() -> Self {
+//         Self {
+//             listed_products: UnorderedMap::new(b"listed_products".to_vec()),
+//         }
+//     }
+// }
 
 // implement marketplace methods
 #[near_bindgen]
@@ -31,12 +31,12 @@ impl MarketPlace {
 
     // initialize the contract
     // create a new instance of `UnorderedMap`
-    // #[init]
-    // pub fn init() -> Self {
-    //     Self {
-    //         listed_products: UnorderedMap::new(b"listed_products".to_vec()),
-    //     }
-    // }
+    #[init]
+    pub fn init() -> Self {
+        Self {
+            listed_products: UnorderedMap::new(b"listed_products".to_vec()),
+        }
+    }
 
     // add a new product to the `listed_products` map by using `Payload` struct
     // * first check if the product id already exists in the map
@@ -55,7 +55,7 @@ impl MarketPlace {
 
     // return all products in the map
     pub fn get_products(&self) -> Vec<Product> {
-        return self.listed_products.values_as_vector().to_vec();
+        self.listed_products.values_as_vector().to_vec()
     }
 
     #[payable]
