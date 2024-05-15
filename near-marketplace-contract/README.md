@@ -25,13 +25,13 @@
 
 ### lib.rs
 
-- `near_bindgen` 매크로 중복 제거
+- **`near_bindgen` 매크로 중복 제거**
     
     `MarketPlace` struct 정의 및 impl에만 `near_bindgen` 매크로 작성할 것
     
     `MarketPlace`에 종속되는 `Product`와 `Payload`에 추가로 적용할 필요 없음
 
-- `price` type 변경
+- **`price` type 변경**
     
     `Product` 및 `Payload` 구조체의 `price` 필드는 u128 라는 큰 숫자를 String으로 변환하여 저장함.
 
