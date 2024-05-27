@@ -4,7 +4,7 @@ import AddProduct from "./AddProduct";
 import Product from "./Product";
 import Loader from "../utils/Loader";
 import { Row } from "react-bootstrap";
-import { NotificationSuccess, NotificationError } from "../utils/Notifications";
+import { NotificationSuccess, NotificationError } from "../utils/Notification";
 import {
   getProducts as getProductList,
   buyProduct,
